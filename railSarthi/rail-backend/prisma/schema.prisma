@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum Role {
+  manager
+  station_manager
+  booking_clerk
+  loco_pilot
+}
+
+enum TrainStatus {
+  on_time
+  late
+  cancelled
+}
+
+enum arrDept {
+  D // departure
+  A // arrival
+}
+
+enum SeatStatus {
+  available
+  booked
+  reserved
+}
+
+enum seatType {
+  SL // side lower
+  SU // side upper
+  L // lower
+  M // middle
+  U // upper
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+}
+
+model Location {
+  id    Int    @id @default(autoincrement())
+  city  String
+  state String
+
+  users     User[]
+  employees Employee[]
+  stations  Station[]
+  admins    Admin[]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String 
+  firstName String
+  lastName  String
+  age       Int
+  gender    Gender
+  cityId    Int
+  city      Location @relation(fields: [cityId], references: [id])
+
+  passengers Passenger[]
+}
+
+model Employee {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  age       Int
+  email     String   @unique
+  role      Role
+  cityId    Int
+  city      Location @relation(fields: [cityId], references: [id])
+  gender    Gender
+  password  String
+
+  shifts Shift[]
+}
+
+model Station {
+  id     Int      @id @default(autoincrement())
+  name   String
+  cityId Int
+  city   Location @relation(fields: [cityId], references: [id])
+
+  trainRoutes      TrainRoute[]
+  tripsBoarding    Trip[]       @relation(name: "boarding_station")
+  tripsDestination Trip[]       @relation(name: "destination_station")
+  schedules        Schedule[]
+  shifts           Shift[]
+}
+
+model Train {
+  id          Int         @id @default(autoincrement())
+  trainName   String
+  sourceStId  Int
+  destStId    Int
+  noOfCoaches Int
+  noOfSeats   Int
+  locoPilotId Int
+  status      TrainStatus
+
+  routes    TrainRoute[]
+  schedules Schedule[]
+  trips     Trip[]
+  coaches   Coach[]
+  shifts    Shift[]
+}
+
+model TrainRoute {
+  id        Int       @id @default(autoincrement())
+  trainId   Int
+  train     Train     @relation(fields: [trainId], references: [id])
+  stationId Int
+  station   Station   @relation(fields: [stationId], references: [id])
+  stopNo    Int
+  arrival   DateTime?
+  departure DateTime?
+}
+
+model Schedule {
+  id        Int      @id @default(autoincrement())
+  trainId   Int
+  train     Train    @relation(fields: [trainId], references: [id])
+  stationId Int
+  station   Station  @relation(fields: [stationId], references: [id])
+  date      DateTime
+  arrDept   arrDept
+}
+
+model Shift {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  stationId  Int?
+  station    Station? @relation(fields: [stationId], references: [id])
+  trainId    Int?
+  train      Train?   @relation(fields: [trainId], references: [id])
+  shiftNo    Int
+}
+
+model Trip {
+  id           Int     @id @default(autoincrement())
+  boardingStId Int
+  boardingSt   Station @relation(fields: [boardingStId], references: [id], name: "boarding_station")
+  destId       Int
+  destination  Station @relation(fields: [destId], references: [id], name: "destination_station")
+  trainId      Int
+  train        Train   @relation(fields: [trainId], references: [id])
+  distance     Int
+
+  tickets Ticket[]
+}
+
+model Ticket {
+  pnr         Int       @id
+  coachId     Int
+  coach       Coach     @relation(fields: [coachId], references: [id])
+  price       Float
+  date        DateTime
+  tripId      Int
+  trip        Trip      @relation(fields: [tripId], references: [id])
+  passengerId Int
+  passenger   Passenger @relation(fields: [passengerId], references: [id])
+
+  payment Payment?
+}
+
+model Coach {
+  id        Int      @id @default(autoincrement())
+  trainId   Int
+  train     Train    @relation(fields: [trainId], references: [id])
+  noOfSeats Int
+  seats     Seat[]
+  tickets   Ticket[]
+}
+
+model Seat {
+  id       Int        @id @default(autoincrement())
+  coachId  Int
+  coach    Coach      @relation(fields: [coachId], references: [id])
+  seatNo   Int
+  seatType seatType
+  status   SeatStatus @default(available)
+
+  @@unique([coachId, seatNo])
+}
+
+model Payment {
+  id          Int           @id @default(autoincrement())
+  ticketId    Int           @unique
+  ticket      Ticket        @relation(fields: [ticketId], references: [pnr])
+  amount      Float
+  paymentDate DateTime      @default(now())
+  status      PaymentStatus @default(pending)
+  transaction Transaction?
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  paymentId     Int      @unique
+  payment       Payment  @relation(fields: [paymentId], references: [id])
+  transactionId String
+  timestamp     DateTime @default(now())
+}
+
+model Passenger {
+  id     Int    @id @default(autoincrement())
+  name   String
+  age    Int
+  gender Gender
+  userId Int?
+  user   User?  @relation(fields: [userId], references: [id])
+
+  tickets Ticket[]
+}
+
+model Admin {
+  id             Int      @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  email          String   @unique
+  password       String
+  cityId         Int
+  city           Location @relation(fields: [cityId], references: [id])
+  age            Int
+  gender         Gender
+  createdByAdmin Int      @default(0)
+}
+
