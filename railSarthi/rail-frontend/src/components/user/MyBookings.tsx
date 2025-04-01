@@ -29,13 +29,17 @@ export function MyBookings() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("HI from useEffect");
     fetchTickets();
   }, []);
 
   const fetchTickets = async () => {
     try {
+      console.log("HI from fetchTickets above");
       const response = await api.get("/api/v1/user/tickets");
+      console.log("HI from fetchTickets below");
       setTickets(response.data.tickets);
+      console.log(response.data.tickets);
       setLoading(false);
     } catch (err: any) {
       if (err.response?.status === 401) {
@@ -84,7 +88,7 @@ export function MyBookings() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">My Bookings</h2>
+        <h2 className="text-black text-2xl font-bold mb-6">My Bookings</h2>
 
         {error && (
           <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-md">
