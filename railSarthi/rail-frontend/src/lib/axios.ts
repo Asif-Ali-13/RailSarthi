@@ -11,9 +11,18 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Check if it's an admin API request
+    if (config.url?.includes('/api/v1/admin')) {
+      const adminToken = localStorage.getItem("adminToken");
+      if (adminToken) {
+        config.headers.Authorization = `Bearer ${adminToken}`;
+      }
+    } else {
+      // For user API requests
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     return config;
@@ -36,11 +45,24 @@ api.interceptors.response.use(
       headers: error.response?.headers
     });
     
+    // Handle admin authentication errors
     if (error.response?.status === 401) {
-      if (!window.location.pathname.includes('/login')) {
-        localStorage.removeItem("token");
-        console.log("token removed");
-        window.location.href = "/login"; // Redirect to login
+      const requestUrl = error.config?.url || '';
+      
+      if (requestUrl.includes('/api/v1/admin')) {
+        // Admin authentication error
+        if (!window.location.pathname.includes('/admin')) {
+          localStorage.removeItem("adminToken");
+          console.log("admin token removed");
+          window.location.href = "/admin";
+        }
+      } else {
+        // User authentication error
+        if (!window.location.pathname.includes('/login')) {
+          localStorage.removeItem("token");
+          console.log("token removed");
+          window.location.href = "/login"; // Redirect to login
+        }
       }
     }
     return Promise.reject(error);
