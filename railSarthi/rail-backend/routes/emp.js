@@ -52,33 +52,3 @@ empRouter.get("/lp/trains", empMiddleware, locoMiddleware, locoPilotGetTrains);
 
 module.exports = { empRouter };
 
-/**
-Employee Endpoints
-
-Authentication & Profile
-POST /signin - Employee login (no middleware)
-GET /profile - Get employee profile (empMiddleware)
-PUT /update-profile - Update employee profile (empMiddleware)
-PUT /reset-password - Reset employee password (empMiddleware)
-GET /shifts - Get employee's shifts (empMiddleware)
-
-Manager Routes (all require empMiddleware)
-GET /m/employees - Get all employees
-POST /m/addEmployee - Add new employee
-GET /m/employees/:empId - Get specific employee details
-PUT /m/employees/:empId/update-role - Update employee role
-DELETE /m/employees/:empId - Remove employee
-
-Station Manager Routes (all require empMiddleware)
-GET /sm/trains - Get all trains for station
-GET /sm/trains/:trainId - Get specific train details
-POST /sm/schedule - Add new schedule
-PUT /sm/schedule/:id - Update schedule
-DELETE /sm/schedule/:id - Remove schedule
-
-Loco Pilot Routes
-GET /lp/trains - Get assigned trains (empMiddleware + locoMiddleware)
-*/
-
-
-

@@ -17,6 +17,14 @@ import { Dashboard } from "./components/admin/Dashboard";
 import { Trains } from "./components/admin/Trains";
 import { Stations } from "./components/admin/Stations";
 import { Profile as AdminProfile } from "./components/admin/Profile";
+import { AddTrain } from "./components/admin/AddTrain";
+import { EditTrain } from "./components/admin/EditTrain";
+import { EditStation } from "./components/admin/EditStation";
+import { AddStation } from "./components/admin/AddStation";
+import { Employees } from "./components/admin/Employees";
+import { AddEmployee } from "./components/admin/AddEmployee";
+import { EditEmployee } from "./components/admin/EditEmployee";
+import { AddAdmin } from "./components/admin/AddAdmin";
 
 function App() {
   return (
@@ -31,8 +39,16 @@ function App() {
         }>
           <Route index element={<Dashboard />} />
           <Route path="trains" element={<Trains />} />
+          <Route path="trains/add" element={<AddTrain />} />
+          <Route path="trains/:id/edit" element={<EditTrain />} />
           <Route path="stations" element={<Stations />} />
+          <Route path="stations/:id/edit" element={<EditStation />} />
+          <Route path="stations/add" element={<AddStation />} />
           <Route path="profile" element={<AdminProfile />} />
+          <Route path="employees" element={<Employees />} />
+          <Route path="employees/add" element={<AddEmployee />} />
+          <Route path="employees/:id/edit" element={<EditEmployee />} />
+          <Route path="add-admin" element={<AddAdmin />} />
         </Route>
         
         {/* User Routes */}

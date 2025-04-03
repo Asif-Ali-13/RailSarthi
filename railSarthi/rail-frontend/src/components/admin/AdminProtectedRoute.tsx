@@ -1,7 +1,9 @@
+import React from "react";
 import { Navigate } from "react-router-dom";
 
+
 interface AdminProtectedRouteProps {
-  children: JSX.Element;
+  children: React.ReactNode;
 }
 
 export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {

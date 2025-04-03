@@ -2,61 +2,60 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../lib/axios";
 
-type Train = {
+type Employee = {
   id: number;
-  name: string;
-  status: string;
-  sourceStation: string;
-  destinationStation: string;
-  totalCoaches: number;
-  totalSeats: number;
-  routes: {
-    stopNo: number;
-    stationName: string;
-    city: string;
-    arrival: string;
-    departure: string;
-  }[];
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  city: string;
+  state: string;
 };
 
-export function Trains() {
+export function Employees() {
   const navigate = useNavigate();
-  const [trains, setTrains] = useState<Train[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchTrains();
-  }, []);
-
-  const fetchTrains = async () => {
+  const fetchEmployees = async () => {
     try {
-      const response = await api.get("/api/v1/admin/trains");
-      setTrains(response.data.trains);
+      const response = await api.get("/api/v1/admin/employees");
+      setEmployees(response.data.employees);
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching trains:", err);
-      setError("Failed to load trains. Please try again later.");
+      console.error("Error fetching employees:", err);
+      setError("Failed to load employees. Please try again later.");
       setLoading(false);
     }
   };
 
-  const handleDelete = async (trainId: number) => {
-    if (!window.confirm("Are you sure you want to delete this train?")) {
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this employee?")) {
       return;
     }
 
     try {
-      await api.delete(`/api/v1/admin/trains/${trainId}`);
-      setSuccess("Train deleted successfully");
-      fetchTrains(); // Refresh the list
+      await api.delete(`/api/v1/admin/employees/${id}`);
+      setSuccess("Employee deleted successfully");
+      fetchEmployees(); // Refresh the list
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to delete train");
+      setError(err.response?.data?.message || "Failed to delete employee");
       setTimeout(() => setError(null), 3000);
     }
   };
+
+  const handleEdit = (id: number) => {
+    console.log("hi from handleEdit from employees")
+    navigate(`/admin/dashboard/employees/${id}/edit`);
+  };
+
 
   if (loading) {
     return (
@@ -69,15 +68,15 @@ export function Trains() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-black">Manage Trains</h1>
+        <h1 className="text-2xl font-bold text-black">Manage Employees</h1>
         <Link 
-          to="/admin/dashboard/trains/add"
+          to="/admin/dashboard/employees/add"
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
           </svg>
-          Add New Train
+          Add New Employee
         </Link>
       </div>
 
@@ -102,22 +101,19 @@ export function Trains() {
                   ID
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
-                  Train Name
+                  Name
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
-                  Source
+                  Email
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
-                  Destination
+                  Role
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
-                  Coaches
+                  City
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
-                  Seats
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
-                  Status
+                  State
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Actions
@@ -125,48 +121,37 @@ export function Trains() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {trains.length > 0 ? (
-                trains.map((train) => (
-                  <tr key={train.id}>
+              {employees.length > 0 ? (
+                employees.map((employee) => (
+                  <tr key={employee.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                      {train.id}
+                      {employee.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-black">
-                      {train.name}
+                      {`${employee.firstName} ${employee.lastName}`}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                      {train.sourceStation}
+                      {employee.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                      {train.destinationStation}
+                      {employee.role}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                      {train.totalCoaches}
+                      {employee.city}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                      {train.totalSeats}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        train.status === "on_time" 
-                          ? "bg-green-100 text-green-800" 
-                          : train.status === "late" 
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }`}>
-                        {train.status}
-                      </span>
+                      {employee.state}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                       <div className="flex space-x-2">
                         <button 
-                          onClick={() => navigate(`/admin/dashboard/trains/${train.id}/edit`)}
+                          onClick={() => handleEdit(employee.id)}
                           className="text-indigo-400 hover:text-indigo-600"
                         >
                           Edit
                         </button>
                         <button 
-                          onClick={() => handleDelete(train.id)}
+                          onClick={() => handleDelete(employee.id)}
                           className="text-red-400 hover:text-red-600"
                         >
                           Delete
@@ -177,8 +162,8 @@ export function Trains() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-6 py-4 text-center text-black">
-                    No trains found
+                  <td colSpan={7} className="px-6 py-4 text-center text-black">
+                    No employees found
                   </td>
                 </tr>
               )}

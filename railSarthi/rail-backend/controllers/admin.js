@@ -280,7 +280,7 @@ const addNewAdmin = async (req, res) => {
         });
     }
 
-    const { email, city, state } = req.body;
+    const { email, city, state, password } = req.body;
     
     // Check if admin already exists
     const existingAdmin = await client.admin.findUnique({
@@ -313,7 +313,7 @@ const addNewAdmin = async (req, res) => {
         });
     }
 
-    const { password, firstName, lastName, age, gender } = req.body;
+    const { firstName, lastName, age, gender } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await client.admin.create({
@@ -322,7 +322,7 @@ const addNewAdmin = async (req, res) => {
             lastName,
             email,
             password: hashedPassword,
-            cityId: location.id, // Use location ID
+            cityId: location.id,
             gender,
             age,
             createdByAdmin: req.admin.AdminId
@@ -341,24 +341,32 @@ description : to get all stations
 */
 
 const getAllStations = async (req, res) => {
-    const stations = await client.station.findMany({
-        include: {
-            city: true
-        }
-    });
+    try {
+        const stations = await client.station.findMany({
+            include: {
+                city: true
+            }
+        });
 
-    // Format station data
-    const formattedStations = stations.map(station => ({
-        id: station.id,
-        name: station.name,
-        city: station.city.city,
-        state: station.city.state
-    }));
+        // Format station data
+        const formattedStations = stations.map(station => ({
+            id: station.id,
+            name: station.name,
+            city: station.city.city,
+            state: station.city.state
+        }));
 
-    res.json({
-        message: "All stations",
-        stations: formattedStations
-    });
+        res.json({
+            message: "All stations",
+            stations: formattedStations
+        });
+    } catch (error) {
+        console.error("Error in getAllStations:", error);
+        res.status(500).json({
+            message: "Error retrieving stations",
+            error: error.message
+        });
+    }
 };
 
 /**
@@ -446,34 +454,60 @@ description : to get all trains
 */
 
 const getAllTrains = async (req, res) => {
-    const trains = await client.train.findMany({
-        include: {
-            routes: {
-                include: {
-                    station: {
-                        include: {
-                            city: true
+    try {
+        const trains = await client.train.findMany({
+            include: {
+                routes: {
+                    include: {
+                        station: {
+                            include: {
+                                city: true
+                            }
                         }
+                    },
+                    orderBy: {
+                        stopNo: 'asc'
                     }
                 },
-                orderBy: {
-                    stopNo: 'asc'
-                }
-            },
-            coaches: {
-                include: {
-                    _count: {
-                        select: { seats: true }
+                coaches: {
+                    include: {
+                        _count: {
+                            select: { seats: true }
+                        }
                     }
                 }
             }
-        }
-    });
+        });
 
-    res.json({
-        message: "All trains",
-        trains
-    });
+        // Format train data
+        const formattedTrains = trains.map(train => ({
+            id: train.id,
+            name: train.trainName,
+            status: train.status,
+            sourceStation: train.routes[0]?.station.name || 'Unknown',
+            destinationStation: train.routes[train.routes.length - 1]?.station.name || 'Unknown',
+            totalCoaches: train.noOfCoaches,
+            totalSeats: train.noOfSeats,
+            routes: train.routes.map(route => ({
+                stopNo: route.stopNo,
+                stationName: route.station.name,
+                city: route.station.city.city,
+                arrival: route.arrival ? new Date(route.arrival).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null,
+                departure: route.departure ? new Date(route.departure).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null
+            }))
+        }));
+
+        res.json({
+            message: "All trains",
+            trains: formattedTrains
+        });
+    } catch (error) {
+        console.error("Error in getAllTrains:", error);
+        res.status(500).json({
+            message: "Error retrieving trains",
+            error: error.message
+        });
+    }
 };
 
 /**
@@ -505,11 +539,17 @@ const addTrain = async (req, res) => {
 
     // Check if source and destination stations exist
     const sourceStation = await client.station.findUnique({
-        where: { id: sourceStationId }
+        where: { id: sourceStationId },
+        include: {
+            city: true
+        }
     });
 
     const destStation = await client.station.findUnique({
-        where: { id: destStationId }
+        where: { id: destStationId },
+        include: {
+            city: true
+        }
     });
 
     if (!sourceStation || !destStation) {
@@ -532,22 +572,212 @@ const addTrain = async (req, res) => {
         });
     }
 
-    // Create new train
-    const newTrain = await client.train.create({
+    try {
+        // Get current date for creating ISO-8601 DateTime
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        
+        // Create new train with routes
+        const newTrain = await client.train.create({
+            data: {
+                trainName,
+                sourceStId: sourceStationId,
+                destStId: destStationId,
+                noOfCoaches,
+                noOfSeats,
+                locoPilotId,
+                status,
+                routes: {
+                    create: [
+                        {
+                            stopNo: 1,
+                            stationId: sourceStationId,
+                            arrival: null,
+                            departure: `${todayStr}T00:00:00.000Z`
+                        },
+                        {
+                            stopNo: 2,
+                            stationId: destStationId,
+                            arrival: `${todayStr}T23:59:00.000Z`,
+                            departure: null
+                        }
+                    ]
+                }
+            },
+            include: {
+                routes: {
+                    include: {
+                        station: {
+                            include: {
+                                city: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Format the response
+        const formattedTrain = {
+            id: newTrain.id,
+            name: newTrain.trainName,
+            status: newTrain.status,
+            sourceStation: newTrain.routes[0]?.station.name || 'Unknown',
+            destinationStation: newTrain.routes[1]?.station.name || 'Unknown',
+            totalCoaches: newTrain.noOfCoaches,
+            totalSeats: newTrain.noOfSeats,
+            routes: newTrain.routes.map(route => ({
+                stopNo: route.stopNo,
+                stationName: route.station.name,
+                city: route.station.city.city,
+                arrival: route.arrival ? new Date(route.arrival).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null,
+                departure: route.departure ? new Date(route.departure).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null
+            }))
+        };
+
+        res.status(201).json({
+            message: "Train added successfully",
+            train: formattedTrain
+        });
+    } catch (error) {
+        console.error("Error creating train:", error);
+        res.status(500).json({
+            message: "Failed to create train",
+            error: error.message
+        });
+    }
+};
+
+/**
+method : GET
+route : /api/v1/admin/employees
+description : to get all employees
+*/
+
+const getAllEmployees = async (req, res) => {
+    try {
+        const employees = await client.employee.findMany({
+            include: {
+                city: true
+            }
+        });
+
+        // Format employee data
+        const formattedEmployees = employees.map(employee => ({
+            id: employee.id,
+            firstName: employee.firstName,
+            lastName: employee.lastName,
+            email: employee.email,
+            role: employee.role,
+            city: employee.city.city,
+            state: employee.city.state,
+            gender: employee.gender,
+            age: employee.age
+        }));
+
+        res.json({
+            message: "All employees",
+            employees: formattedEmployees
+        });
+    } catch (error) {
+        console.error("Error in getAllEmployees:", error);
+        res.status(500).json({
+            message: "Error retrieving employees",
+            error: error.message
+        });
+    }
+};
+
+/**
+method : POST
+route : /api/v1/admin/employees
+description : to add a new employee
+*/
+
+const addEmployee = async (req, res) => {
+    const requireBody = z.object({
+        firstName: z.string().min(3).max(30),
+        lastName: z.string().min(3).max(30),
+        email: z.string().min(3).max(100).email(),
+        password: z.string().min(3).max(100),
+        role: z.enum(["manager", "station_manager", "booking_clerk", "loco_pilot"]),
+        city: z.string().min(3).max(50),
+        state: z.string().min(3).max(50),
+        gender: z.enum(["male", "female", "other"]),
+        age: z.number().int().max(120)
+    });
+
+    const parseDataWithSuccess = requireBody.safeParse(req.body);
+    if(!parseDataWithSuccess.success){
+        return res.status(400).json({
+            message: "Incorrect format",
+            error: parseDataWithSuccess.error.format()
+        });
+    }
+
+    const { email, city, state, password } = req.body;
+    
+    // Check if employee already exists
+    const existingEmployee = await client.employee.findUnique({
+        where: { email }
+    });
+
+    if (existingEmployee) {
+        return res.status(400).json({
+            message: "Email already exists"
+        });
+    }
+
+    // Check if location exists or create new one
+    let location = await client.location.findFirst({
+        where: {
+            AND: [
+                { city: { equals: city, mode: 'insensitive' } },
+                { state: { equals: state, mode: 'insensitive' } }
+            ]
+        }
+    });
+
+    if (!location) {
+        // Create new location if it doesn't exist
+        location = await client.location.create({
+            data: {
+                city,
+                state
+            }
+        });
+    }
+
+    const { firstName, lastName, role, gender, age } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new employee
+    const newEmployee = await client.employee.create({
         data: {
-            trainName,
-            sourceStId: sourceStationId,
-            destStId: destStationId,
-            noOfCoaches,
-            noOfSeats,
-            locoPilotId,
-            status
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            role,
+            cityId: location.id,
+            gender,
+            age
         }
     });
 
     res.status(201).json({
-        message: "Train added successfully",
-        train: newTrain
+        message: "Employee added successfully",
+        employee: {
+            id: newEmployee.id,
+            firstName: newEmployee.firstName,
+            lastName: newEmployee.lastName,
+            email: newEmployee.email,
+            role: newEmployee.role,
+            city,
+            state,
+            gender: newEmployee.gender,
+            age: newEmployee.age
+        }
     });
 };
 
@@ -560,5 +790,7 @@ module.exports = {
     getAllStations,
     addStation,
     getAllTrains,
-    addTrain
+    addTrain,
+    getAllEmployees,
+    addEmployee
 };

@@ -12,11 +12,15 @@ const {
     getAllStations,
     addStation,
     getAllTrains,
-    addTrain
+    addTrain,
+    getAllEmployees,
+    addEmployee
 } = require("../controllers/admin");
 
 // Authentication routes
 adminRouter.post("/signin", adminSignIn);
+
+// Profile routes
 adminRouter.get("/profile", adminMiddleware, adminProfile);
 adminRouter.put("/update-profile", adminMiddleware, updateAdminProfile);
 adminRouter.put("/reset-password", adminMiddleware, resetAdminPassword);
@@ -29,6 +33,10 @@ adminRouter.post("/stations", adminMiddleware, addStation);
 // Train management routes
 adminRouter.get("/trains", adminMiddleware, getAllTrains);
 adminRouter.post("/trains", adminMiddleware, addTrain);
+
+// Employee management routes
+adminRouter.get("/employees", adminMiddleware, getAllEmployees);
+adminRouter.post("/employees", adminMiddleware, addEmployee);
 
 module.exports = { adminRouter };
 

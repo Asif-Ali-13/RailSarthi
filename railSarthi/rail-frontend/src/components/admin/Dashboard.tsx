@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../lib/axios";
 
 type Stats = {
@@ -7,119 +8,231 @@ type Stats = {
   tickets: number;
 };
 
+type Station = {
+  id: number;
+  name: string;
+  city: string;
+  state: string;
+};
+
+type Train = {
+  id: number;
+  name: string;
+  status: string;
+  sourceStation: string;
+  destinationStation: string;
+  totalCoaches: number;
+  totalSeats: number;
+  routes: {
+    stopNo: number;
+    stationName: string;
+    city: string;
+    arrival: string;
+    departure: string;
+  }[];
+};
+
 export function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     trains: 0,
     stations: 0,
     tickets: 0
   });
+  const [stations, setStations] = useState<Station[]>([]);
+  const [trains, setTrains] = useState<Train[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        // In a real app, you'd have an API to fetch this data
-        // For now, we'll mock it by getting trains and stations
-        const trainsResponse = await api.get("/api/v1/admin/trains");
-        const stationsResponse = await api.get("/api/v1/admin/stations");
+        const [trainsResponse, stationsResponse] = await Promise.all([
+          api.get("/api/v1/admin/trains"),
+          api.get("/api/v1/admin/stations")
+        ]);
+        
+        console.log("trainsResponse:", trainsResponse.data);
+        console.log("stationsResponse:", stationsResponse.data);
         
         setStats({
           trains: trainsResponse.data.trains.length,
           stations: stationsResponse.data.stations.length,
-          tickets: Math.floor(Math.random() * 100) // Mock data
+          tickets: Math.floor(Math.random() * 100) // Mock data for now
         });
+        setStations(stationsResponse.data.stations);
+        setTrains(trainsResponse.data.trains);
         setLoading(false);
-      } catch (err) {
-        console.error("Error fetching dashboard stats:", err);
-        setError("Failed to load dashboard statistics.");
+      } catch (err: any) {
+        console.error("Error fetching dashboard data:", err);
+        setError(err.response?.data?.message || "Failed to load dashboard data.");
         setLoading(false);
       }
     };
     
-    fetchStats();
+    fetchData();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="w-screen min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-        <strong className="font-bold">Error: </strong>
-        <span className="block sm:inline">{error}</span>
+      <div className="w-screen min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error}</span>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-black mb-6">Admin Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-indigo-100 text-indigo-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
-              </svg>
-            </div>
-            <div className="ml-5">
-              <h2 className="text-lg font-semibold text-black">Total Trains</h2>
-              <p className="mt-1 text-3xl font-bold text-black">{stats.trains}</p>
-            </div>
-          </div>
+    <div className="w-screen min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-black text-2xl font-bold">Dashboard</h2>
+          <button
+            onClick={() => navigate("/admin/dashboard/add-admin")}
+            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Add New Admin
+          </button>
         </div>
         
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" />
-              </svg>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+          {/* Trains Card */}
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Total Trains</dt>
+                    <dd className="text-lg font-medium text-gray-900">{stats.trains}</dd>
+                  </dl>
+                </div>
+              </div>
             </div>
-            <div className="ml-5">
-              <h2 className="text-lg font-semibold text-black">Total Stations</h2>
-              <p className="mt-1 text-3xl font-bold text-black">{stats.stations}</p>
+          </div>
+
+          {/* Stations Card */}
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Total Stations</dt>
+                    <dd className="text-lg font-medium text-gray-900">{stats.stations}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tickets Card */}
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Total Tickets</dt>
+                    <dd className="text-lg font-medium text-gray-900">{stats.tickets}</dd>
+                  </dl>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-100 text-blue-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-              </svg>
-            </div>
-            <div className="ml-5">
-              <h2 className="text-lg font-semibold text-black">Total Tickets</h2>
-              <p className="mt-1 text-3xl font-bold text-black">{stats.tickets}</p>
-            </div>
+
+        {/* Stations Table */}
+        <div className="bg-white shadow rounded-lg mb-8">
+          <div className="px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Stations</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {stations.map((station) => (
+                  <tr key={station.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{station.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{station.city}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{station.state}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
-      
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-black mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a href="/admin/trains/add" className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-4 px-6 rounded-lg flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add New Train
-          </a>
-          <a href="/admin/stations/add" className="bg-green-100 hover:bg-green-200 text-green-700 py-4 px-6 rounded-lg flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add New Station
-          </a>
+
+        {/* Trains Table */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Trains</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coaches</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seats</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {trains.map((train) => (
+                  <tr key={train.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{train.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${train.status === 'on_time' ? 'bg-green-100 text-green-800' : 
+                          train.status === 'late' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-red-100 text-red-800'}`}>
+                        {train.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{train.sourceStation}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{train.destinationStation}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{train.totalCoaches}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{train.totalSeats}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

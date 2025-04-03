@@ -223,10 +223,10 @@ export function BookingPage() {
     }
   };
 
-  if (loading && !train) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="w-screen min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -263,307 +263,310 @@ export function BookingPage() {
   const selectedTripData = trips.find(trip => trip.id === selectedTrip);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {success ? (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
-          <strong className="font-bold">Success: </strong>
-          <span className="block sm:inline">{success}</span>
-          <p className="mt-2">Redirecting to your bookings...</p>
-        </div>
-      ) : (
-        <>
-          <div className="mb-6">
-            <Link to={`/trains/${trainId}`} className="text-blue-600 hover:text-blue-800 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Train Details
-            </Link>
+    <div className="w-screen min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto">
+        <h2 className="text-black text-2xl font-bold mb-6">Book Your Ticket</h2>
+        {success ? (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
+            <strong className="font-bold">Success: </strong>
+            <span className="block sm:inline">{success}</span>
+            <p className="mt-2">Redirecting to your bookings...</p>
           </div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <Link to={`/trains/${trainId}`} className="text-blue-600 hover:text-blue-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Train Details
+              </Link>
+            </div>
 
-          <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div className="p-6">
-              <h1 className="text-2xl font-bold text-black mb-6">Book Ticket - {train.name}</h1>
-              
-              {/* Booking Progress */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bookingStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
-                      1
+            <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+              <div className="p-6">
+                <h1 className="text-2xl font-bold text-black mb-6">Book Ticket - {train.name}</h1>
+                
+                {/* Booking Progress */}
+                <div className="mb-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bookingStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                        1
+                      </div>
+                      <span className="mt-2 text-sm text-black">Select Trip</span>
                     </div>
-                    <span className="mt-2 text-sm text-black">Select Trip</span>
-                  </div>
-                  <div className={`flex-1 h-1 mx-2 ${bookingStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
-                  <div className="flex flex-col items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bookingStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
-                      2
+                    <div className={`flex-1 h-1 mx-2 ${bookingStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+                    <div className="flex flex-col items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bookingStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                        2
+                      </div>
+                      <span className="mt-2 text-sm text-black">Choose Seat</span>
                     </div>
-                    <span className="mt-2 text-sm text-black">Choose Seat</span>
-                  </div>
-                  <div className={`flex-1 h-1 mx-2 ${bookingStep >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
-                  <div className="flex flex-col items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bookingStep >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
-                      3
+                    <div className={`flex-1 h-1 mx-2 ${bookingStep >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+                    <div className="flex flex-col items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bookingStep >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                        3
+                      </div>
+                      <span className="mt-2 text-sm text-black">Passenger Details</span>
                     </div>
-                    <span className="mt-2 text-sm text-black">Passenger Details</span>
                   </div>
                 </div>
-              </div>
-              
-              {/* Step 1: Select Trip */}
-              {bookingStep === 1 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4 text-black">Select Your Trip</h2>
-                  
-                  <div className="grid gap-4 mb-6">
-                    {trips.map(trip => (
-                      <div 
-                        key={trip.id}
-                        onClick={() => handleTripSelection(trip.id)}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                          selectedTrip === trip.id 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200 hover:border-blue-300'
+                
+                {/* Step 1: Select Trip */}
+                {bookingStep === 1 && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 text-black">Select Your Trip</h2>
+                    
+                    <div className="grid gap-4 mb-6">
+                      {trips.map(trip => (
+                        <div 
+                          key={trip.id}
+                          onClick={() => handleTripSelection(trip.id)}
+                          className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                            selectedTrip === trip.id 
+                              ? 'border-blue-500 bg-blue-50' 
+                              : 'border-gray-200 hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="flex items-center">
+                                <div className="text-lg font-medium text-black">{trip.from.stationName}</div>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                                <div className="text-lg font-medium text-black">{trip.to.stationName}</div>
+                              </div>
+                              <div className="text-sm text-black mt-1">
+                                {trip.from.city} to {trip.to.city}
+                              </div>
+                              <div className="text-sm text-black mt-1">Distance: {trip.distance} km</div>
+                            </div>
+                            <div className="text-xl font-bold text-blue-600">₹{trip.price.toFixed(2)}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="mt-6 flex justify-between">
+                      <Link 
+                        to={`/trains/${trainId}`}
+                        className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
+                      >
+                        Cancel
+                      </Link>
+                      <button
+                        onClick={handleNextStep}
+                        disabled={selectedTrip === null}
+                        className={`px-6 py-2 rounded font-medium ${
+                          selectedTrip !== null
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                       >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <div className="flex items-center">
-                              <div className="text-lg font-medium text-black">{trip.from.stationName}</div>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                              </svg>
-                              <div className="text-lg font-medium text-black">{trip.to.stationName}</div>
-                            </div>
-                            <div className="text-sm text-black mt-1">
-                              {trip.from.city} to {trip.to.city}
-                            </div>
-                            <div className="text-sm text-black mt-1">Distance: {trip.distance} km</div>
-                          </div>
-                          <div className="text-xl font-bold text-blue-600">₹{trip.price.toFixed(2)}</div>
-                        </div>
-                      </div>
-                    ))}
+                        Next: Choose Seat
+                      </button>
+                    </div>
                   </div>
-                  
-                  <div className="mt-6 flex justify-between">
-                    <Link 
-                      to={`/trains/${trainId}`}
-                      className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
-                    >
-                      Cancel
-                    </Link>
-                    <button
-                      onClick={handleNextStep}
-                      disabled={selectedTrip === null}
-                      className={`px-6 py-2 rounded font-medium ${
-                        selectedTrip !== null
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      Next: Choose Seat
-                    </button>
-                  </div>
-                </div>
-              )}
-              
-              {/* Step 2: Select Seat */}
-              {bookingStep === 2 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4 text-black">Select Your Seat</h2>
-                  
-                  {train.coaches.length > 0 && (
-                    <>
-                      <div className="mb-4">
-                        <label className="block text-black mb-2">Select Coach:</label>
-                        <div className="flex space-x-2 overflow-x-auto pb-2">
-                          {train.coaches.map((coach) => (
-                            <button
-                              key={coach.id}
-                              onClick={() => setSelectedCoach(coach.id)}
-                              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                                selectedCoach === coach.id
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-gray-100 text-black hover:bg-gray-200'
-                              }`}
-                            >
-                              Coach {coach.id}
-                              <span className="ml-2 px-2 py-1 text-xs rounded-full bg-white text-black">
-                                {coach.availableSeats}/{coach.totalSeats}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      {selectedCoachData && (
-                        <div className="border rounded-lg overflow-hidden mb-6">
-                          <div className="bg-gray-50 py-3 px-4 border-b">
-                            <h3 className="text-lg font-medium text-black">
-                              Coach {selectedCoachData.id} - {selectedCoachData.availableSeats} seats available
-                            </h3>
-                          </div>
-                          <div className="p-4 grid grid-cols-10 gap-2">
-                            {selectedCoachData.seats.map((seat) => (
-                              <div
-                                key={seat.id}
-                                onClick={() => seat.status === 'available' && handleSeatSelection(seat.id)}
-                                className={`relative p-2 border rounded-md text-center ${
-                                  seat.status === "available"
-                                    ? selectedSeat === seat.id
-                                      ? "bg-blue-100 border-blue-500 cursor-pointer"
-                                      : "bg-green-50 border-green-200 cursor-pointer hover:bg-green-100"
-                                    : seat.status === "booked"
-                                    ? "bg-red-50 border-red-200"
-                                    : "bg-yellow-50 border-yellow-200"
+                )}
+                
+                {/* Step 2: Select Seat */}
+                {bookingStep === 2 && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 text-black">Select Your Seat</h2>
+                    
+                    {train.coaches.length > 0 && (
+                      <>
+                        <div className="mb-4">
+                          <label className="block text-black mb-2">Select Coach:</label>
+                          <div className="flex space-x-2 overflow-x-auto pb-2">
+                            {train.coaches.map((coach) => (
+                              <button
+                                key={coach.id}
+                                onClick={() => setSelectedCoach(coach.id)}
+                                className={`px-4 py-2 text-sm font-medium rounded-md ${
+                                  selectedCoach === coach.id
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-black hover:bg-gray-200'
                                 }`}
                               >
-                                <div className="text-xs font-medium text-black">{seat.seatNo}</div>
-                                <div className="text-xs text-black">₹{seat.price}</div>
-                                {seat.status !== "available" ? (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md">
-                                    <span className="text-xs font-medium text-black">
-                                      {seat.status.charAt(0).toUpperCase() + seat.status.slice(1)}
-                                    </span>
-                                  </div>
-                                ) : selectedSeat === seat.id && (
-                                  <div className="absolute inset-0 flex items-center justify-center rounded-md">
-                                    <span className="text-xs font-medium text-blue-600">
-                                      Selected
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
+                                Coach {coach.id}
+                                <span className="ml-2 px-2 py-1 text-xs rounded-full bg-white text-black">
+                                  {coach.availableSeats}/{coach.totalSeats}
+                                </span>
+                              </button>
                             ))}
                           </div>
                         </div>
-                      )}
-                    </>
-                  )}
-                  
-                  <div className="mt-6 flex justify-between">
-                    <button
-                      onClick={handlePrevStep}
-                      className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
-                    >
-                      Back
-                    </button>
-                    <button
-                      onClick={handleNextStep}
-                      disabled={selectedSeat === null}
-                      className={`px-6 py-2 rounded font-medium ${
-                        selectedSeat !== null
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      Next: Passenger Details
-                    </button>
-                  </div>
-                </div>
-              )}
-              
-              {/* Step 3: Passenger Details */}
-              {bookingStep === 3 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4 text-black">Enter Passenger Details</h2>
-                  
-                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                    <h3 className="font-medium text-blue-700 mb-2">Trip Summary</h3>
-                    {selectedTripData && (
-                      <div className="text-black">
-                        <p className="mb-1"><span className="font-medium">From:</span> {selectedTripData.from.stationName}, {selectedTripData.from.city}</p>
-                        <p className="mb-1"><span className="font-medium">To:</span> {selectedTripData.to.stationName}, {selectedTripData.to.city}</p>
-                        <p className="mb-1"><span className="font-medium">Train:</span> {train.name}</p>
-                        <p className="mb-1"><span className="font-medium">Seat:</span> Coach {selectedCoach}, Seat {selectedCoachData?.seats.find(seat => seat.id === selectedSeat)?.seatNo}</p>
-                        <p className="font-medium text-green-700">Price: ₹{selectedTripData.price.toFixed(2)}</p>
-                      </div>
+                        
+                        {selectedCoachData && (
+                          <div className="border rounded-lg overflow-hidden mb-6">
+                            <div className="bg-gray-50 py-3 px-4 border-b">
+                              <h3 className="text-lg font-medium text-black">
+                                Coach {selectedCoachData.id} - {selectedCoachData.availableSeats} seats available
+                              </h3>
+                            </div>
+                            <div className="p-4 grid grid-cols-10 gap-2">
+                              {selectedCoachData.seats.map((seat) => (
+                                <div
+                                  key={seat.id}
+                                  onClick={() => seat.status === 'available' && handleSeatSelection(seat.id)}
+                                  className={`relative p-2 border rounded-md text-center ${
+                                    seat.status === "available"
+                                      ? selectedSeat === seat.id
+                                        ? "bg-blue-100 border-blue-500 cursor-pointer"
+                                        : "bg-green-50 border-green-200 cursor-pointer hover:bg-green-100"
+                                      : seat.status === "booked"
+                                      ? "bg-red-50 border-red-200"
+                                      : "bg-yellow-50 border-yellow-200"
+                                  }`}
+                                >
+                                  <div className="text-xs font-medium text-black">{seat.seatNo}</div>
+                                  <div className="text-xs text-black">₹{seat.price}</div>
+                                  {seat.status !== "available" ? (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md">
+                                      <span className="text-xs font-medium text-black">
+                                        {seat.status.charAt(0).toUpperCase() + seat.status.slice(1)}
+                                      </span>
+                                    </div>
+                                  ) : selectedSeat === seat.id && (
+                                    <div className="absolute inset-0 flex items-center justify-center rounded-md">
+                                      <span className="text-xs font-medium text-blue-600">
+                                        Selected
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
-                  </div>
-                  
-                  <div className="space-y-4 mb-6">
-                    <div>
-                      <label htmlFor="name" className="block text-black mb-1">Passenger Name</label>
-                      <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        value={passengerDetails.name}
-                        onChange={handlePassengerDetailsChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
-                        placeholder="Enter full name"
-                        required
-                      />
-                    </div>
                     
-                    <div>
-                      <label htmlFor="age" className="block text-black mb-1">Age</label>
-                      <input
-                        id="age"
-                        name="age"
-                        type="number"
-                        min="1"
-                        max="120"
-                        value={passengerDetails.age}
-                        onChange={handlePassengerDetailsChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
-                        placeholder="Enter age"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="gender" className="block text-black mb-1">Gender</label>
-                      <select
-                        id="gender"
-                        name="gender"
-                        value={passengerDetails.gender}
-                        onChange={handlePassengerDetailsChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
-                        required
+                    <div className="mt-6 flex justify-between">
+                      <button
+                        onClick={handlePrevStep}
+                        className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
                       >
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
+                        Back
+                      </button>
+                      <button
+                        onClick={handleNextStep}
+                        disabled={selectedSeat === null}
+                        className={`px-6 py-2 rounded font-medium ${
+                          selectedSeat !== null
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                      >
+                        Next: Passenger Details
+                      </button>
                     </div>
                   </div>
-                  
-                  <div className="mt-6 flex justify-between">
-                    <button
-                      onClick={handlePrevStep}
-                      className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
-                    >
-                      Back
-                    </button>
-                    <button
-                      onClick={handleBookTicket}
-                      disabled={loading || !passengerDetails.name || !passengerDetails.age}
-                      className={`px-6 py-2 rounded font-medium ${
-                        !loading && passengerDetails.name && passengerDetails.age
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      {loading ? (
-                        <span className="flex items-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Processing...
-                        </span>
-                      ) : "Book Ticket"}
-                    </button>
+                )}
+                
+                {/* Step 3: Passenger Details */}
+                {bookingStep === 3 && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 text-black">Enter Passenger Details</h2>
+                    
+                    <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                      <h3 className="font-medium text-blue-700 mb-2">Trip Summary</h3>
+                      {selectedTripData && (
+                        <div className="text-black">
+                          <p className="mb-1"><span className="font-medium">From:</span> {selectedTripData.from.stationName}, {selectedTripData.from.city}</p>
+                          <p className="mb-1"><span className="font-medium">To:</span> {selectedTripData.to.stationName}, {selectedTripData.to.city}</p>
+                          <p className="mb-1"><span className="font-medium">Train:</span> {train.name}</p>
+                          <p className="mb-1"><span className="font-medium">Seat:</span> Coach {selectedCoach}, Seat {selectedCoachData?.seats.find(seat => seat.id === selectedSeat)?.seatNo}</p>
+                          <p className="font-medium text-green-700">Price: ₹{selectedTripData.price.toFixed(2)}</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-4 mb-6">
+                      <div>
+                        <label htmlFor="name" className="block text-black mb-1">Passenger Name</label>
+                        <input
+                          id="name"
+                          name="name"
+                          type="text"
+                          value={passengerDetails.name}
+                          onChange={handlePassengerDetailsChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
+                          placeholder="Enter full name"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="age" className="block text-black mb-1">Age</label>
+                        <input
+                          id="age"
+                          name="age"
+                          type="number"
+                          min="1"
+                          max="120"
+                          value={passengerDetails.age}
+                          onChange={handlePassengerDetailsChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
+                          placeholder="Enter age"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="gender" className="block text-black mb-1">Gender</label>
+                        <select
+                          id="gender"
+                          name="gender"
+                          value={passengerDetails.gender}
+                          onChange={handlePassengerDetailsChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
+                          required
+                        >
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 flex justify-between">
+                      <button
+                        onClick={handlePrevStep}
+                        className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={handleBookTicket}
+                        disabled={loading || !passengerDetails.name || !passengerDetails.age}
+                        className={`px-6 py-2 rounded font-medium ${
+                          !loading && passengerDetails.name && passengerDetails.age
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                      >
+                        {loading ? (
+                          <span className="flex items-center">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                          </span>
+                        ) : "Book Ticket"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 } 

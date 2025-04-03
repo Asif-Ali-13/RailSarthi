@@ -223,7 +223,7 @@ export function Profile() {
                     setIsEditing(false);
                     setFormData(profile);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-black bg-white hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-white bg-white hover:bg-gray-50"
                   disabled={loading}
                 >
                   Cancel

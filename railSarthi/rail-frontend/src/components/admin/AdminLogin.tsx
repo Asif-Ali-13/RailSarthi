@@ -22,6 +22,7 @@ export function AdminLogin() {
 
       localStorage.setItem("adminToken", response.data.token);
       setLoading(false);
+      console.log("navigating to admin dashboard");
       navigate("/admin/dashboard");
     } catch (err: any) {
       setLoading(false);
