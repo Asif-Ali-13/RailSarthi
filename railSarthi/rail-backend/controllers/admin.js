@@ -943,6 +943,59 @@ const deleteStation = async (req, res) => {
     }
 };
 
+/**
+method : DELETE
+route : /api/v1/admin/employees/:id
+description : to delete an employee
+*/
+
+const deleteEmployee = async (req, res) => {
+    try {
+        const employeeId = parseInt(req.params.id);
+        
+        if (isNaN(employeeId)) {
+            return res.status(400).json({
+                message: "Invalid employee ID"
+            });
+        }
+
+        // Check if employee exists
+        const employee = await client.employee.findUnique({
+            where: { id: employeeId },
+            include: {
+                shifts: true
+            }
+        });
+
+        if (!employee) {
+            return res.status(404).json({
+                message: "Employee not found"
+            });
+        }
+
+        // Delete all related records first
+        // Delete shifts
+        await client.shift.deleteMany({
+            where: { employeeId }
+        });
+
+        // Finally, delete the employee
+        await client.employee.delete({
+            where: { id: employeeId }
+        });
+
+        res.json({
+            message: "Employee deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error deleting employee:", error);
+        res.status(500).json({
+            message: "Failed to delete employee",
+            error: error.message
+        });
+    }
+};
+
 module.exports = { 
     adminSignIn, 
     adminProfile, 
@@ -956,5 +1009,6 @@ module.exports = {
     addTrain,
     deleteTrain,
     getAllEmployees,
-    addEmployee
+    addEmployee,
+    deleteEmployee
 };
