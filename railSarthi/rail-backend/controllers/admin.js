@@ -342,24 +342,24 @@ description : to get all stations
 
 const getAllStations = async (req, res) => {
     try {
-        const stations = await client.station.findMany({
-            include: {
-                city: true
-            }
-        });
+    const stations = await client.station.findMany({
+        include: {
+            city: true
+        }
+    });
 
-        // Format station data
-        const formattedStations = stations.map(station => ({
-            id: station.id,
-            name: station.name,
-            city: station.city.city,
-            state: station.city.state
-        }));
+    // Format station data
+    const formattedStations = stations.map(station => ({
+        id: station.id,
+        name: station.name,
+        city: station.city.city,
+        state: station.city.state
+    }));
 
-        res.json({
-            message: "All stations",
-            stations: formattedStations
-        });
+    res.json({
+        message: "All stations",
+        stations: formattedStations
+    });
     } catch (error) {
         console.error("Error in getAllStations:", error);
         res.status(500).json({
@@ -455,29 +455,29 @@ description : to get all trains
 
 const getAllTrains = async (req, res) => {
     try {
-        const trains = await client.train.findMany({
-            include: {
-                routes: {
-                    include: {
-                        station: {
-                            include: {
-                                city: true
-                            }
+    const trains = await client.train.findMany({
+        include: {
+            routes: {
+                include: {
+                    station: {
+                        include: {
+                            city: true
                         }
-                    },
-                    orderBy: {
-                        stopNo: 'asc'
                     }
                 },
-                coaches: {
-                    include: {
-                        _count: {
-                            select: { seats: true }
-                        }
+                orderBy: {
+                    stopNo: 'asc'
+                }
+            },
+            coaches: {
+                include: {
+                    _count: {
+                        select: { seats: true }
                     }
                 }
             }
-        });
+        }
+    });
 
         // Format train data
         const formattedTrains = trains.map(train => ({
@@ -497,8 +497,8 @@ const getAllTrains = async (req, res) => {
             }))
         }));
 
-        res.json({
-            message: "All trains",
+    res.json({
+        message: "All trains",
             trains: formattedTrains
         });
     } catch (error) {
@@ -578,14 +578,14 @@ const addTrain = async (req, res) => {
         const todayStr = today.toISOString().split('T')[0];
         
         // Create new train with routes
-        const newTrain = await client.train.create({
-            data: {
-                trainName,
-                sourceStId: sourceStationId,
-                destStId: destStationId,
-                noOfCoaches,
-                noOfSeats,
-                locoPilotId,
+    const newTrain = await client.train.create({
+        data: {
+            trainName,
+            sourceStId: sourceStationId,
+            destStId: destStationId,
+            noOfCoaches,
+            noOfSeats,
+            locoPilotId,
                 status,
                 routes: {
                     create: [
@@ -635,8 +635,8 @@ const addTrain = async (req, res) => {
             }))
         };
 
-        res.status(201).json({
-            message: "Train added successfully",
+    res.status(201).json({
+        message: "Train added successfully",
             train: formattedTrain
         });
     } catch (error) {
@@ -1351,6 +1351,244 @@ const updateStation = async (req, res) => {
     }
 };
 
+/**
+method : GET
+route : /api/v1/admin/trains/:id
+description : to get a particular train's information
+*/
+
+const getTrain = async (req, res) => {
+    try {
+        const trainId = parseInt(req.params.id);
+        
+        if (isNaN(trainId)) {
+            return res.status(400).json({
+                message: "Invalid train ID"
+            });
+        }
+
+        // Get train with all related information
+        const train = await client.train.findUnique({
+            where: { id: trainId },
+            include: {
+                routes: {
+                    include: {
+                        station: {
+                            include: {
+                                city: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        stopNo: 'asc'
+                    }
+                },
+                coaches: {
+                    include: {
+                        _count: {
+                            select: { seats: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!train) {
+            return res.status(404).json({
+                message: "Train not found"
+            });
+        }
+
+        // Format the response
+        const formattedTrain = {
+            id: train.id,
+            name: train.trainName,
+            status: train.status,
+            sourceStationId: train.sourceStId,
+            destinationStationId: train.destStId,
+            totalCoaches: train.noOfCoaches,
+            totalSeats: train.noOfSeats,
+            locoPilotId: train.locoPilotId,
+            routes: train.routes.map(route => ({
+                stopNo: route.stopNo,
+                stationId: route.stationId,
+                stationName: route.station.name,
+                city: route.station.city.city,
+                state: route.station.city.state,
+                arrival: route.arrival ? new Date(route.arrival).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null,
+                departure: route.departure ? new Date(route.departure).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null
+            }))
+        };
+
+        res.json({
+            message: "Train details retrieved successfully",
+            train: formattedTrain
+        });
+    } catch (error) {
+        console.error("Error fetching train:", error);
+        res.status(500).json({
+            message: "Failed to fetch train details",
+            error: error.message
+        });
+    }
+};
+
+/**
+method : PUT
+route : /api/v1/admin/trains/:id
+description : to update a particular train's information
+*/
+
+const updateTrain = async (req, res) => {
+    try {
+        const trainId = parseInt(req.params.id);
+        
+        if (isNaN(trainId)) {
+            return res.status(400).json({
+                message: "Invalid train ID"
+            });
+        }
+
+        const requireBody = z.object({
+            trainName: z.string().min(3).max(50),
+            sourceStationId: z.number().int(),
+            destStationId: z.number().int(),
+            noOfCoaches: z.number().int().min(1),
+            noOfSeats: z.number().int().min(1),
+            locoPilotId: z.number().int(),
+            status: z.enum(["on_time", "late", "cancelled"]).default("on_time")
+        });
+
+        const parseDataWithSuccess = requireBody.safeParse(req.body);
+        if(!parseDataWithSuccess.success){
+            return res.status(400).json({
+                message: "Incorrect format",
+                error: parseDataWithSuccess.error.format()
+            });
+        }
+
+        const { trainName, sourceStationId, destStationId, noOfCoaches, noOfSeats, locoPilotId, status } = req.body;
+        
+        // Check if train exists
+        const existingTrain = await client.train.findUnique({
+            where: { id: trainId }
+        });
+
+        if (!existingTrain) {
+            return res.status(404).json({
+                message: "Train not found"
+            });
+        }
+
+        // Check if source and destination stations exist
+        const sourceStation = await client.station.findUnique({
+            where: { id: sourceStationId }
+        });
+
+        const destStation = await client.station.findUnique({
+            where: { id: destStationId }
+        });
+
+        if (!sourceStation || !destStation) {
+            return res.status(404).json({
+                message: "Source or destination station not found"
+            });
+        }
+
+        // Check if loco pilot exists and has the correct role
+        const locoPilot = await client.employee.findFirst({
+            where: {
+                id: locoPilotId,
+                role: "loco_pilot"
+            }
+        });
+
+        if (!locoPilot) {
+            return res.status(404).json({
+                message: "Loco pilot not found or employee is not a loco pilot"
+            });
+        }
+
+        // Get current date for creating ISO-8601 DateTime
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+
+        // Update train and its routes
+        const updatedTrain = await client.train.update({
+            where: { id: trainId },
+            data: {
+                trainName,
+                sourceStId: sourceStationId,
+                destStId: destStationId,
+                noOfCoaches,
+                noOfSeats,
+                locoPilotId,
+                status,
+                routes: {
+                    deleteMany: {},
+                    create: [
+                        {
+                            stopNo: 1,
+                            stationId: sourceStationId,
+                            arrival: null,
+                            departure: `${todayStr}T00:00:00.000Z`
+                        },
+                        {
+                            stopNo: 2,
+                            stationId: destStationId,
+                            arrival: `${todayStr}T23:59:00.000Z`,
+                            departure: null
+                        }
+                    ]
+                }
+            },
+            include: {
+                routes: {
+                    include: {
+                        station: {
+                            include: {
+                                city: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Format the response
+        const formattedTrain = {
+            id: updatedTrain.id,
+            name: updatedTrain.trainName,
+            status: updatedTrain.status,
+            sourceStationId: updatedTrain.sourceStId,
+            destinationStationId: updatedTrain.destStId,
+            totalCoaches: updatedTrain.noOfCoaches,
+            totalSeats: updatedTrain.noOfSeats,
+            locoPilotId: updatedTrain.locoPilotId,
+            routes: updatedTrain.routes.map(route => ({
+                stopNo: route.stopNo,
+                stationId: route.stationId,
+                stationName: route.station.name,
+                city: route.station.city.city,
+                state: route.station.city.state,
+                arrival: route.arrival ? new Date(route.arrival).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null,
+                departure: route.departure ? new Date(route.departure).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : null
+            }))
+        };
+
+        res.json({
+            message: "Train updated successfully",
+            train: formattedTrain
+        });
+    } catch (error) {
+        console.error("Error updating train:", error);
+        res.status(500).json({
+            message: "Failed to update train",
+            error: error.message
+        });
+    }
+};
+
 module.exports = { 
     adminSignIn, 
     adminProfile, 
@@ -1369,5 +1607,7 @@ module.exports = {
     getEmployee,
     updateEmployee,
     getStation,
-    updateStation
+    updateStation,
+    getTrain,
+    updateTrain
 };

@@ -11,7 +11,8 @@ type Station = {
 
 type Employee = {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: string;
 };
 
@@ -42,11 +43,11 @@ export function EditTrain() {
   const [locoPilots, setLocoPilots] = useState<Employee[]>([]);
   const [train, setTrain] = useState<Train | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
+    trainName: "",
     sourceStationId: "",
-    destinationStationId: "",
-    totalCoaches: "",
-    totalSeats: "",
+    destStationId: "",
+    noOfCoaches: "",
+    noOfSeats: "",
     locoPilotId: "",
     status: "on_time"
   });
@@ -66,11 +67,11 @@ export function EditTrain() {
         setLocoPilots(employeesResponse.data.employees.filter((emp: Employee) => emp.role === "loco_pilot"));
         
         setFormData({
-          name: trainData.name,
+          trainName: trainData.name,
           sourceStationId: trainData.sourceStationId.toString(),
-          destinationStationId: trainData.destinationStationId.toString(),
-          totalCoaches: trainData.totalCoaches.toString(),
-          totalSeats: trainData.totalSeats.toString(),
+          destStationId: trainData.destinationStationId.toString(),
+          noOfCoaches: trainData.totalCoaches.toString(),
+          noOfSeats: trainData.totalSeats.toString(),
           locoPilotId: trainData.locoPilotId.toString(),
           status: trainData.status
         });
@@ -93,16 +94,17 @@ export function EditTrain() {
 
     try {
       await api.put(`/api/v1/admin/trains/${id}`, {
-        ...formData,
+        trainName: formData.trainName,
         sourceStationId: parseInt(formData.sourceStationId),
-        destinationStationId: parseInt(formData.destinationStationId),
-        totalCoaches: parseInt(formData.totalCoaches),
-        totalSeats: parseInt(formData.totalSeats),
-        locoPilotId: parseInt(formData.locoPilotId)
+        destStationId: parseInt(formData.destStationId),
+        noOfCoaches: parseInt(formData.noOfCoaches),
+        noOfSeats: parseInt(formData.noOfSeats),
+        locoPilotId: parseInt(formData.locoPilotId),
+        status: formData.status
       });
 
       setSuccess("Train updated successfully");
-      setTimeout(() => navigate("/admin/trains"), 2000);
+      setTimeout(() => navigate("/admin/dashboard/trains"), 2000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to update train");
     }
@@ -150,17 +152,17 @@ export function EditTrain() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-black">
+          <label htmlFor="trainName" className="block text-sm font-medium text-black">
             Train Name
           </label>
           <input
             type="text"
-            id="name"
-            name="name"
-            value={formData.name}
+            id="trainName"
+            name="trainName"
+            value={formData.trainName}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="text-gray-900 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
 
@@ -174,7 +176,7 @@ export function EditTrain() {
             value={formData.sourceStationId}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="text-gray-900 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
             <option value="">Select source station</option>
             {stations.map(station => (
@@ -186,16 +188,16 @@ export function EditTrain() {
         </div>
 
         <div>
-          <label htmlFor="destinationStationId" className="block text-sm font-medium text-black">
+          <label htmlFor="destStationId" className="block text-sm font-medium text-black">
             Destination Station
           </label>
           <select
-            id="destinationStationId"
-            name="destinationStationId"
-            value={formData.destinationStationId}
+            id="destStationId"
+            name="destStationId"
+            value={formData.destStationId}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="text-gray-900 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
             <option value="">Select destination station</option>
             {stations.map(station => (
@@ -207,34 +209,34 @@ export function EditTrain() {
         </div>
 
         <div>
-          <label htmlFor="totalCoaches" className="block text-sm font-medium text-black">
+          <label htmlFor="noOfCoaches" className="block text-sm font-medium text-black">
             Total Coaches
           </label>
           <input
             type="number"
-            id="totalCoaches"
-            name="totalCoaches"
-            value={formData.totalCoaches}
+            id="noOfCoaches"
+            name="noOfCoaches"
+            value={formData.noOfCoaches}
             onChange={handleChange}
             required
             min="1"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="text-gray-900 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
 
         <div>
-          <label htmlFor="totalSeats" className="block text-sm font-medium text-black">
+          <label htmlFor="noOfSeats" className="block text-sm font-medium text-black">
             Total Seats
           </label>
           <input
             type="number"
-            id="totalSeats"
-            name="totalSeats"
-            value={formData.totalSeats}
+            id="noOfSeats"
+            name="noOfSeats"
+            value={formData.noOfSeats}
             onChange={handleChange}
             required
             min="1"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="text-gray-900 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
 
@@ -248,12 +250,12 @@ export function EditTrain() {
             value={formData.locoPilotId}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="text-gray-900 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
             <option value="">Select loco pilot</option>
             {locoPilots.map(pilot => (
-              <option key={pilot.id} value={pilot.id}>
-                {pilot.name}
+              <option key={pilot.id} value={pilot.id} className="text-black">
+                {pilot.firstName} {pilot.lastName}
               </option>
             ))}
           </select>
@@ -269,7 +271,7 @@ export function EditTrain() {
             value={formData.status}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="text-gray-900 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
             <option value="on_time">On Time</option>
             <option value="late">Late</option>
@@ -280,8 +282,8 @@ export function EditTrain() {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => navigate("/admin/trains")}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={() => navigate("/admin/dashboard/trains")}
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Cancel
           </button>
