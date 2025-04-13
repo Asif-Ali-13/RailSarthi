@@ -17,7 +17,9 @@ const {
     getAllEmployees,
     addEmployee,
     deleteStation,
-    deleteEmployee
+    deleteEmployee,
+    getEmployee,
+    updateEmployee
 } = require("../controllers/admin");
 
 // Authentication routes
@@ -43,6 +45,8 @@ adminRouter.delete("/trains/:id", adminMiddleware, deleteTrain);
 adminRouter.get("/employees", adminMiddleware, getAllEmployees);
 adminRouter.post("/employees", adminMiddleware, addEmployee);
 adminRouter.delete("/employees/:id", adminMiddleware, deleteEmployee);
+adminRouter.get("/employees/:id", adminMiddleware, getEmployee);
+adminRouter.put("/employees/:id", adminMiddleware, updateEmployee);
 
 module.exports = { adminRouter };
 

@@ -996,6 +996,193 @@ const deleteEmployee = async (req, res) => {
     }
 };
 
+/**
+method : GET
+route : /api/v1/admin/employees/:id
+description : to get a particular employee's information
+*/
+
+const getEmployee = async (req, res) => {
+    try {
+        const employeeId = parseInt(req.params.id);
+        
+        if (isNaN(employeeId)) {
+            return res.status(400).json({
+                message: "Invalid employee ID"
+            });
+        }
+
+        // Get employee with city information
+        const employee = await client.employee.findUnique({
+            where: { id: employeeId },
+            include: {
+                city: true
+            }
+        });
+
+        if (!employee) {
+            return res.status(404).json({
+                message: "Employee not found"
+            });
+        }
+
+        // Format the response
+        const formattedEmployee = {
+            id: employee.id,
+            firstName: employee.firstName,
+            lastName: employee.lastName,
+            email: employee.email,
+            role: employee.role,
+            city: employee.city.city,
+            state: employee.city.state,
+            gender: employee.gender,
+            age: employee.age
+        };
+
+        res.json({
+            message: "Employee details retrieved successfully",
+            employee: formattedEmployee
+        });
+    } catch (error) {
+        console.error("Error fetching employee:", error);
+        res.status(500).json({
+            message: "Failed to fetch employee details",
+            error: error.message
+        });
+    }
+};
+
+/**
+method : PUT
+route : /api/v1/admin/employees/:id
+description : to update a particular employee's information
+*/
+
+const updateEmployee = async (req, res) => {
+    try {
+        const employeeId = parseInt(req.params.id);
+        
+        if (isNaN(employeeId)) {
+            return res.status(400).json({
+                message: "Invalid employee ID"
+            });
+        }
+
+        const requireBody = z.object({
+            firstName: z.string().min(3).max(30),
+            lastName: z.string().min(3).max(30),
+            email: z.string().min(3).max(100).email(),
+            role: z.enum(["manager", "station_manager", "booking_clerk", "loco_pilot"]),
+            city: z.string().min(3).max(50),
+            state: z.string().min(3).max(50),
+            gender: z.enum(["male", "female", "other"]),
+            age: z.number().int().max(120)
+        });
+
+        const parseDataWithSuccess = requireBody.safeParse(req.body);
+        if(!parseDataWithSuccess.success){
+            return res.status(400).json({
+                message: "Incorrect format",
+                error: parseDataWithSuccess.error.format()
+            });
+        }
+
+        const { email, city, state } = req.body;
+        
+        // Check if employee exists
+        const existingEmployee = await client.employee.findUnique({
+            where: { id: employeeId }
+        });
+
+        if (!existingEmployee) {
+            return res.status(404).json({
+                message: "Employee not found"
+            });
+        }
+
+        // Check if email is being changed and if it already exists
+        if (email !== existingEmployee.email) {
+            const emailExists = await client.employee.findFirst({
+                where: {
+                    email,
+                    NOT: {
+                        id: employeeId
+                    }
+                }
+            });
+
+            if (emailExists) {
+                return res.status(400).json({
+                    message: "Email already exists"
+                });
+            }
+        }
+
+        // Check if location exists or create new one
+        let location = await client.location.findFirst({
+            where: {
+                AND: [
+                    { city: { equals: city, mode: 'insensitive' } },
+                    { state: { equals: state, mode: 'insensitive' } }
+                ]
+            }
+        });
+
+        if (!location) {
+            // Create new location if it doesn't exist
+            location = await client.location.create({
+                data: {
+                    city,
+                    state
+                }
+            });
+        }
+
+        const { firstName, lastName, role, gender, age } = req.body;
+
+        // Update employee
+        const updatedEmployee = await client.employee.update({
+            where: { id: employeeId },
+            data: {
+                firstName,
+                lastName,
+                email,
+                role,
+                cityId: location.id,
+                gender,
+                age
+            },
+            include: {
+                city: true
+            }
+        });
+
+        // Format the response
+        const formattedEmployee = {
+            id: updatedEmployee.id,
+            firstName: updatedEmployee.firstName,
+            lastName: updatedEmployee.lastName,
+            email: updatedEmployee.email,
+            role: updatedEmployee.role,
+            city: updatedEmployee.city.city,
+            state: updatedEmployee.city.state,
+            gender: updatedEmployee.gender,
+            age: updatedEmployee.age
+        };
+
+        res.json({
+            message: "Employee updated successfully",
+            employee: formattedEmployee
+        });
+    } catch (error) {
+        console.error("Error updating employee:", error);
+        res.status(500).json({
+            message: "Failed to update employee",
+            error: error.message
+        });
+    }
+};
+
 module.exports = { 
     adminSignIn, 
     adminProfile, 
@@ -1010,5 +1197,7 @@ module.exports = {
     deleteTrain,
     getAllEmployees,
     addEmployee,
-    deleteEmployee
+    deleteEmployee,
+    getEmployee,
+    updateEmployee
 };
