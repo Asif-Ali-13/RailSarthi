@@ -19,7 +19,9 @@ const {
     deleteStation,
     deleteEmployee,
     getEmployee,
-    updateEmployee
+    updateEmployee,
+    getStation,
+    updateStation
 } = require("../controllers/admin");
 
 // Authentication routes
@@ -35,6 +37,8 @@ adminRouter.post("/addAdmin", adminMiddleware, addNewAdmin);
 adminRouter.get("/stations", adminMiddleware, getAllStations);
 adminRouter.post("/stations", adminMiddleware, addStation);
 adminRouter.delete("/stations/:id", adminMiddleware, deleteStation);
+adminRouter.get("/stations/:id", adminMiddleware, getStation);
+adminRouter.put("/stations/:id", adminMiddleware, updateStation);
 
 // Train management routes
 adminRouter.get("/trains", adminMiddleware, getAllTrains);

@@ -1183,6 +1183,174 @@ const updateEmployee = async (req, res) => {
     }
 };
 
+/**
+method : GET
+route : /api/v1/admin/stations/:id
+description : to get a particular station's information
+*/
+
+const getStation = async (req, res) => {
+    try {
+        const stationId = parseInt(req.params.id);
+        
+        if (isNaN(stationId)) {
+            return res.status(400).json({
+                message: "Invalid station ID"
+            });
+        }
+
+        // Get station with city information
+        const station = await client.station.findUnique({
+            where: { id: stationId },
+            include: {
+                city: true
+            }
+        });
+
+        if (!station) {
+            return res.status(404).json({
+                message: "Station not found"
+            });
+        }
+
+        // Format the response
+        const formattedStation = {
+            id: station.id,
+            name: station.name,
+            city: station.city.city,
+            state: station.city.state
+        };
+
+        res.json({
+            message: "Station details retrieved successfully",
+            station: formattedStation
+        });
+    } catch (error) {
+        console.error("Error fetching station:", error);
+        res.status(500).json({
+            message: "Failed to fetch station details",
+            error: error.message
+        });
+    }
+};
+
+/**
+method : PUT
+route : /api/v1/admin/stations/:id
+description : to update a particular station's information
+*/
+
+const updateStation = async (req, res) => {
+    try {
+        const stationId = parseInt(req.params.id);
+        
+        if (isNaN(stationId)) {
+            return res.status(400).json({
+                message: "Invalid station ID"
+            });
+        }
+
+        const requireBody = z.object({
+            name: z.string().min(3).max(50),
+            city: z.string().min(3).max(50),
+            state: z.string().min(3).max(50)
+        });
+
+        const parseDataWithSuccess = requireBody.safeParse(req.body);
+        if(!parseDataWithSuccess.success){
+            return res.status(400).json({
+                message: "Incorrect format",
+                error: parseDataWithSuccess.error.format()
+            });
+        }
+
+        const { name, city, state } = req.body;
+        
+        // Check if station exists
+        const existingStation = await client.station.findUnique({
+            where: { id: stationId }
+        });
+
+        if (!existingStation) {
+            return res.status(404).json({
+                message: "Station not found"
+            });
+        }
+
+        // Check if station name is being changed and if it already exists
+        if (name !== existingStation.name) {
+            const nameExists = await client.station.findFirst({
+                where: {
+                    name: {
+                        equals: name,
+                        mode: 'insensitive'
+                    },
+                    NOT: {
+                        id: stationId
+                    }
+                }
+            });
+
+            if (nameExists) {
+                return res.status(400).json({
+                    message: "Station name already exists"
+                });
+            }
+        }
+
+        // Check if location exists or create new one
+        let location = await client.location.findFirst({
+            where: {
+                AND: [
+                    { city: { equals: city, mode: 'insensitive' } },
+                    { state: { equals: state, mode: 'insensitive' } }
+                ]
+            }
+        });
+
+        if (!location) {
+            // Create new location if it doesn't exist
+            location = await client.location.create({
+                data: {
+                    city,
+                    state
+                }
+            });
+        }
+
+        // Update station
+        const updatedStation = await client.station.update({
+            where: { id: stationId },
+            data: {
+                name,
+                cityId: location.id
+            },
+            include: {
+                city: true
+            }
+        });
+
+        // Format the response
+        const formattedStation = {
+            id: updatedStation.id,
+            name: updatedStation.name,
+            city: updatedStation.city.city,
+            state: updatedStation.city.state
+        };
+
+        res.json({
+            message: "Station updated successfully",
+            station: formattedStation
+        });
+    } catch (error) {
+        console.error("Error updating station:", error);
+        res.status(500).json({
+            message: "Failed to update station",
+            error: error.message
+        });
+    }
+};
+
 module.exports = { 
     adminSignIn, 
     adminProfile, 
@@ -1199,5 +1367,7 @@ module.exports = {
     addEmployee,
     deleteEmployee,
     getEmployee,
-    updateEmployee
+    updateEmployee,
+    getStation,
+    updateStation
 };
