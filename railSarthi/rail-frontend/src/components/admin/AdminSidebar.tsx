@@ -26,7 +26,7 @@ export function AdminSidebar() {
               to="/admin/dashboard" 
               className={`flex items-center px-4 py-2 rounded-md ${
                 isActive("/admin/dashboard") 
-                  ? "bg-indigo-700" 
+                  ? "bg-white" 
                   : "hover:bg-indigo-700"
               }`}
             >
@@ -40,8 +40,8 @@ export function AdminSidebar() {
             <Link 
               to="/admin/dashboard/trains" 
               className={`flex items-center px-4 py-2 rounded-md ${
-                isActive("/admin/trains/add") 
-                  ? "bg-indigo-700" 
+                isActive("/admin/dashboard/trains") 
+                  ? "bg-white" 
                   : "hover:bg-indigo-700"
               }`}
             >
@@ -55,8 +55,8 @@ export function AdminSidebar() {
             <Link 
               to="/admin/dashboard/stations" 
               className={`flex items-center px-4 py-2 rounded-md ${
-                isActive("/admin/stations") 
-                  ? "bg-indigo-700" 
+                isActive("/admin/dashboard/stations") 
+                  ? "bg-white" 
                   : "hover:bg-indigo-700"
               }`}
             >
@@ -71,7 +71,7 @@ export function AdminSidebar() {
               to="/admin/dashboard/employees" 
               className={`flex items-center px-4 py-2 rounded-md ${
                 isActive("/admin/dashboard/employees") 
-                  ? "bg-indigo-700" 
+                  ? "bg-white" 
                   : "hover:bg-indigo-700"
               }`}
             >
@@ -86,7 +86,7 @@ export function AdminSidebar() {
               to="/admin/dashboard/profile" 
               className={`flex items-center px-4 py-2 rounded-md ${
                 isActive("/admin/dashboard/profile") 
-                  ? "bg-indigo-700" 
+                  ? "bg-white" 
                   : "hover:bg-indigo-700"
               }`}
             >

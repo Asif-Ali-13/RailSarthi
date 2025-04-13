@@ -69,7 +69,7 @@ export function Navbar() {
           </div>
         </div>
       </nav>
-      <main className="container mx-auto px-4 py-8 min-h-screen bg-gray-50">
+      <main className="container mx-auto min-h-screen bg-gray-50 min-w-screen">
         <Outlet />
       </main>
     </>

@@ -362,7 +362,7 @@ export function BookingPage() {
                         className={`px-6 py-2 rounded font-medium ${
                           selectedTrip !== null
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-300 text-white cursor-not-allowed'
                         }`}
                       >
                         Next: Choose Seat
@@ -448,7 +448,7 @@ export function BookingPage() {
                     <div className="mt-6 flex justify-between">
                       <button
                         onClick={handlePrevStep}
-                        className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
+                        className="px-4 py-2 border border-gray-300 rounded text-white hover:bg-gray-50"
                       >
                         Back
                       </button>
@@ -458,7 +458,7 @@ export function BookingPage() {
                         className={`px-6 py-2 rounded font-medium ${
                           selectedSeat !== null
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-300 text-white cursor-not-allowed'
                         }`}
                       >
                         Next: Passenger Details
@@ -536,7 +536,7 @@ export function BookingPage() {
                     <div className="mt-6 flex justify-between">
                       <button
                         onClick={handlePrevStep}
-                        className="px-4 py-2 border border-gray-300 rounded text-black hover:bg-gray-50"
+                        className="px-4 py-2 border border-gray-300 rounded text-white hover:bg-gray-50"
                       >
                         Back
                       </button>
@@ -546,7 +546,7 @@ export function BookingPage() {
                         className={`px-6 py-2 rounded font-medium ${
                           !loading && passengerDetails.name && passengerDetails.age
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-300 text-white cursor-not-allowed'
                         }`}
                       >
                         {loading ? (

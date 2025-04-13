@@ -5,7 +5,6 @@ import api from "../../lib/axios";
 type Stats = {
   trains: number;
   stations: number;
-  tickets: number;
 };
 
 type Station = {
@@ -37,7 +36,6 @@ export function Dashboard() {
   const [stats, setStats] = useState<Stats>({
     trains: 0,
     stations: 0,
-    tickets: 0
   });
   const [stations, setStations] = useState<Station[]>([]);
   const [trains, setTrains] = useState<Train[]>([]);
@@ -58,7 +56,6 @@ export function Dashboard() {
         setStats({
           trains: trainsResponse.data.trains.length,
           stations: stationsResponse.data.stations.length,
-          tickets: Math.floor(Math.random() * 100) // Mock data for now
         });
         setStations(stationsResponse.data.stations);
         setTrains(trainsResponse.data.trains);
@@ -95,7 +92,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="w-screen min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="w-fit mx-auto min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1400px] mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-black text-2xl font-bold">Dashboard</h2>
@@ -107,7 +104,7 @@ export function Dashboard() {
           </button>
         </div>
         
-        {/* Stats Cards */}
+        {/* Stats Cards */} 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
           {/* Trains Card */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -142,25 +139,6 @@ export function Dashboard() {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Total Stations</dt>
                     <dd className="text-lg font-medium text-gray-900">{stats.stations}</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tickets Card */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Tickets</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.tickets}</dd>
                   </dl>
                 </div>
               </div>

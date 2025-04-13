@@ -103,7 +103,7 @@ export function TrainList() {
                   
                   <Link 
                     to={`/trains/${train.id}`}
-                    className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors duration-300"
+                    className="block w-full text-center  !text-white no-underline bg-blue-600 hover:bg-blue-700 font-medium py-2 px-4 rounded transition-colors duration-300"
                   >
                     View Details
                   </Link>
