@@ -33,18 +33,17 @@ export function Stations() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this station?")) {
-      return;
-    }
-
     try {
-      await api.delete(`/api/v1/admin/stations/${id}`);
-      setSuccess("Station deleted successfully");
-      fetchStations(); // Refresh the list
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to delete station");
-      setTimeout(() => setError(null), 3000);
+      setLoading(true);
+      const response = await api.delete(`/api/v1/admin/stations/${id}`);
+      if (response.status === 200) {
+        setSuccess("Station deleted successfully");
+        fetchStations();
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Failed to delete station");
+    } finally {
+      setLoading(false);
     }
   };
 

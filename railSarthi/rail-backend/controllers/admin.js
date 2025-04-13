@@ -866,6 +866,83 @@ const deleteTrain = async (req, res) => {
     }
 };
 
+/**
+method : DELETE
+route : /api/v1/admin/stations/:id
+description : to delete a station
+*/
+
+const deleteStation = async (req, res) => {
+    try {
+        const stationId = parseInt(req.params.id);
+        
+        if (isNaN(stationId)) {
+            return res.status(400).json({
+                message: "Invalid station ID"
+            });
+        }
+
+        // Check if station exists
+        const station = await client.station.findUnique({
+            where: { id: stationId },
+            include: {
+                trainRoutes: true,
+                tripsBoarding: true,
+                tripsDestination: true,
+                schedules: true,
+                shifts: true
+            }
+        });
+
+        if (!station) {
+            return res.status(404).json({
+                message: "Station not found"
+            });
+        }
+
+        // Delete all related records first
+        // Delete train routes
+        await client.trainRoute.deleteMany({
+            where: { stationId }
+        });
+
+        // Delete schedules
+        await client.schedule.deleteMany({
+            where: { stationId }
+        });
+
+        // Delete shifts
+        await client.shift.deleteMany({
+            where: { stationId }
+        });
+
+        // Delete trips where this station is either boarding or destination
+        await client.trip.deleteMany({
+            where: {
+                OR: [
+                    { boardingStId: stationId },
+                    { destId: stationId }
+                ]
+            }
+        });
+
+        // Finally, delete the station
+        await client.station.delete({
+            where: { id: stationId }
+        });
+
+        res.json({
+            message: "Station deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error deleting station:", error);
+        res.status(500).json({
+            message: "Failed to delete station",
+            error: error.message
+        });
+    }
+};
+
 module.exports = { 
     adminSignIn, 
     adminProfile, 
@@ -874,6 +951,7 @@ module.exports = {
     addNewAdmin,
     getAllStations,
     addStation,
+    deleteStation,
     getAllTrains,
     addTrain,
     deleteTrain,
