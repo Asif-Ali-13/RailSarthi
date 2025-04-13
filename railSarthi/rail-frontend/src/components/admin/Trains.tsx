@@ -42,19 +42,19 @@ export function Trains() {
     }
   };
 
-  const handleDelete = async (trainId: number) => {
-    if (!window.confirm("Are you sure you want to delete this train?")) {
-      return;
-    }
-
+  const handleDelete = async (id: number) => {
     try {
-      await api.delete(`/api/v1/admin/trains/${trainId}`);
-      setSuccess("Train deleted successfully");
-      fetchTrains(); // Refresh the list
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to delete train");
-      setTimeout(() => setError(null), 3000);
+      setLoading(true);
+      const response = await api.delete(`/api/v1/admin/trains/${id}`);
+      if (response.status === 200) {
+        setSuccess("Train deleted successfully");
+        // Refresh the trains list
+        fetchTrains();
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Failed to delete train");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,7 +72,7 @@ export function Trains() {
         <h1 className="text-2xl font-bold text-black">Manage Trains</h1>
         <Link 
           to="/admin/dashboard/trains/add"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center"
+          className="bg-indigo-600 hover:bg-indigo-700 !text-white px-4 py-2 rounded-md flex items-center"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -93,7 +93,7 @@ export function Trains() {
         </div>
       )}
       
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-fit">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -161,7 +161,7 @@ export function Trains() {
                       <div className="flex space-x-2">
                         <button 
                           onClick={() => navigate(`/admin/dashboard/trains/${train.id}/edit`)}
-                          className="text-indigo-400 hover:text-indigo-600"
+                          className="text-white hover:text-indigo-400"
                         >
                           Edit
                         </button>

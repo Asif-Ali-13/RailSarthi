@@ -13,6 +13,7 @@ const {
     addStation,
     getAllTrains,
     addTrain,
+    deleteTrain,
     getAllEmployees,
     addEmployee
 } = require("../controllers/admin");
@@ -33,6 +34,7 @@ adminRouter.post("/stations", adminMiddleware, addStation);
 // Train management routes
 adminRouter.get("/trains", adminMiddleware, getAllTrains);
 adminRouter.post("/trains", adminMiddleware, addTrain);
+adminRouter.delete("/trains/:id", adminMiddleware, deleteTrain);
 
 // Employee management routes
 adminRouter.get("/employees", adminMiddleware, getAllEmployees);

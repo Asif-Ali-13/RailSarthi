@@ -781,6 +781,91 @@ const addEmployee = async (req, res) => {
     });
 };
 
+/**
+method : DELETE
+route : /api/v1/admin/trains/:id
+description : to delete a train
+*/
+
+const deleteTrain = async (req, res) => {
+    try {
+        const trainId = parseInt(req.params.id);
+        
+        if (isNaN(trainId)) {
+            return res.status(400).json({
+                message: "Invalid train ID"
+            });
+        }
+
+        // Check if train exists
+        const train = await client.train.findUnique({
+            where: { id: trainId },
+            include: {
+                routes: true,
+                coaches: true,
+                schedules: true,
+                trips: true,
+                shifts: true
+            }
+        });
+
+        if (!train) {
+            return res.status(404).json({
+                message: "Train not found"
+            });
+        }
+
+        // Delete all related records first
+        // Delete train routes
+        await client.trainRoute.deleteMany({
+            where: { trainId }
+        });
+
+        // Delete schedules
+        await client.schedule.deleteMany({
+            where: { trainId }
+        });
+
+        // Delete shifts
+        await client.shift.deleteMany({
+            where: { trainId }
+        });
+
+        // Delete trips
+        await client.trip.deleteMany({
+            where: { trainId }
+        });
+
+        // Delete coaches and their seats
+        for (const coach of train.coaches) {
+            // Delete seats in the coach
+            await client.seat.deleteMany({
+                where: { coachId: coach.id }
+            });
+        }
+
+        // Delete coaches
+        await client.coach.deleteMany({
+            where: { trainId }
+        });
+
+        // Finally, delete the train
+        await client.train.delete({
+            where: { id: trainId }
+        });
+
+        res.json({
+            message: "Train deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error deleting train:", error);
+        res.status(500).json({
+            message: "Failed to delete train",
+            error: error.message
+        });
+    }
+};
+
 module.exports = { 
     adminSignIn, 
     adminProfile, 
@@ -791,6 +876,7 @@ module.exports = {
     addStation,
     getAllTrains,
     addTrain,
+    deleteTrain,
     getAllEmployees,
     addEmployee
 };
